@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 
+
 # Настройки оформления
 BG_COLOR = "#F0F0F0"
 BUTTON_COLOR = "#40E0D0"
@@ -13,10 +14,12 @@ window.title("Крестики-нолики")
 window.geometry("300x450")
 window.configure(bg=BG_COLOR)
 
-buttons = []
+
+
+
 current_player = "X"
+buttons = []
 start_symbol = "X"
-wins = {'X': 0, 'O': 0}  # Счётчик побед
 
 # Создаем контейнеры
 start_frame = tk.Frame(window, bg=BG_COLOR)
@@ -73,6 +76,14 @@ def check_winner():
         return buttons[0][2]["text"]
     return None
 
+wins = {'X': 0, 'O': 0}
+
+score_frame = tk.Frame(window)
+score_frame.pack(pady=10)
+
+score_label = tk.Label(score_frame, text="X: 0   O: 0", font=("Arial", 14))
+score_label.pack()
+
 
 def update_score():
     score_label.config(text=f"X: {wins['X']}   O: {wins['O']}")
@@ -88,29 +99,50 @@ def handle_win(winner):
         messagebox.showinfo("Победа!", f"Игрок {winner} выиграл раунд!")
         reset_field()
 
+    return None
 
-def check_winner():
-    for i in range(3):
-        if buttons[i][0]["text"] == buttons[i][1]["text"] == buttons[i][2]["text"] != "":
-            return True
-        if buttons[0][i]["text"] == buttons[1][i]["text"] == buttons[2][i]["text"] != "":
-            return True
-        if buttons[0][0]["text"] == buttons[1][1]["text"] == buttons[2][2]["text"] != "":
-            return True
-        if buttons[0][2]["text"] == buttons[1][1]["text"] == buttons[2][0]["text"] != "":
-            return True
-        return False
+
+def check_draw():
+    return all(btn["text"] != "" for row in buttons for btn in row)
+
+
+def reset_board():
+    global current_player
+    for row in buttons:
+        for btn in row:
+            btn.config(text="")
+    current_player = "X"
+
+
+def end_round(winner=None):
+    if winner:
+        wins[winner] += 1
+        update_score()
+        if wins[winner] == 3:
+            messagebox.showinfo("Игра окончена", f"Игрок {winner} выиграл серию!")
+            wins.update({'X': 0, 'O': 0})
+            update_score()
+    reset_board()
 
 
 def on_click(row, col):
     global current_player
 
+
     if buttons[row][col]['text'] !="":
-        return
-    buttons[row][col]['text'] = current_player
-    if check_winner():
-        messagebox.showinfo("Игра окончена", f"Игрок {current_player} победил!")
-    current_player = "0" if current_player == "X" else "X"
+       return
+
+    buttons[row][col].config(text=current_player)
+
+    winner = check_winner()
+    if winner:
+        messagebox.showinfo("Победа!", f"Игрок {winner} победил!")
+        end_round(winner)
+    elif check_draw():
+        messagebox.showinfo("Ничья!", "Ничья! Начните новый раунд!")
+        end_round()
+    else:
+        current_player = "O" if current_player == "X" else "X"
 
 
 
@@ -118,16 +150,9 @@ def on_click(row, col):
         buttons[row][col].config(text=current_player)
         winner = check_winner()
 
-        if winner:
-            for row in buttons:
-                for btn in row:
-                    btn.config(state=tk.DISABLED)
-            window.after(100, lambda: handle_win(winner))
-        elif all(btn['text'] != "" for row in buttons for btn in row):
-            messagebox.showinfo("Ничья!", "Раунд окончен вничью!")
-            reset_field()
-        else:
-            current_player = "O" if current_player == "X" else "X"
+# Игровое поле
+game_frame = tk.Frame(window)
+game_frame.pack(pady=20)
 
 
 # Виджеты для выбора символа
@@ -154,6 +179,7 @@ tk.Button(start_frame, text="Начать игру", command=start_game,
 for i in range(3):
     row = []
     for j in range(3):
+
         btn = tk.Button(game_frame, text="", font=TEXT_FONT,
                         bg=BUTTON_COLOR, activebackground=ACTIVE_COLOR,
                         width=BUTTON_SIZE, height=BUTTON_SIZE // 2,
@@ -170,5 +196,7 @@ score_label.grid(row=3, column=0, columnspan=3, pady=10)
 # Кнопка сброса
 tk.Button(game_frame, text="Новая игра", font=("Arial", 12),
           command=restart_game, bg="#FF5722", fg="white").grid(row=4, column=0, columnspan=3, pady=10, sticky="we")
+
+      
 
 window.mainloop()
