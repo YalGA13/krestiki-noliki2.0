@@ -7,13 +7,11 @@ window.geometry("300x400")
 
 current_player = "X"
 buttons = []
-wins = {'X': 0, 'O': 0}  # Счётчик побед
+wins = {'X': 0, 'O': 0}
 
-# Создаём фрейм для счётчика
 score_frame = tk.Frame(window)
 score_frame.pack(pady=10)
 
-# Метка для отображения счёта
 score_label = tk.Label(score_frame, text="X: 0   O: 0", font=("Arial", 14))
 score_label.pack()
 
@@ -27,20 +25,22 @@ def check_winner():
     for i in range(3):
         if buttons[i][0]["text"] == buttons[i][1]["text"] == buttons[i][2]["text"] != "":
             return buttons[i][0]["text"]
+
     # Проверка вертикалей
     for i in range(3):
         if buttons[0][i]["text"] == buttons[1][i]["text"] == buttons[2][i]["text"] != "":
             return buttons[0][i]["text"]
+
     # Проверка диагоналей
     if buttons[0][0]["text"] == buttons[1][1]["text"] == buttons[2][2]["text"] != "":
         return buttons[0][0]["text"]
     if buttons[0][2]["text"] == buttons[1][1]["text"] == buttons[2][0]["text"] != "":
         return buttons[0][2]["text"]
+
     return None
 
 
 def check_draw():
-    # Проверка на ничью
     return all(btn["text"] != "" for row in buttons for btn in row)
 
 
@@ -58,7 +58,7 @@ def end_round(winner=None):
         update_score()
         if wins[winner] == 3:
             messagebox.showinfo("Игра окончена", f"Игрок {winner} выиграл серию!")
-            wins['X'] = wins['O'] = 0
+            wins.update({'X': 0, 'O': 0})
             update_score()
     reset_board()
 
@@ -81,7 +81,7 @@ def on_click(row, col):
         current_player = "O" if current_player == "X" else "X"
 
 
-# Создание игрового поля
+# Игровое поле
 game_frame = tk.Frame(window)
 game_frame.pack(pady=20)
 
